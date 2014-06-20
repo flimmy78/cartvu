@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>login</class>
+ <widget class="QDialog" name="login">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1280</width>
+    <height>800</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>25</pointsize>
+   </font>
+  </property>
+  <property name="cursor">
+   <cursorShape>BlankCursor</cursorShape>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="photo.qrc">
+    <normaloff>:/pic/favicon.ico</normaloff>:/pic/favicon.ico</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">#login {
+border-image: url(:/pic/log_bk.png);
+}</string>
+  </property>
+  <widget class="QLineEdit" name="lineEdit">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>190</y>
+     <width>321</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>25</pointsize>
+    </font>
+   </property>
+   <property name="cursor">
+    <cursorShape>BlankCursor</cursorShape>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 153, 51);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QWidget" name="gridLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>320</y>
+     <width>321</width>
+     <height>412</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>150</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>40</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetFixedSize</enum>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="spacing">
+     <number>10</number>
+    </property>
+    <item row="0" column="1">
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/bt2_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QPushButton" name="pushButton_3">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/bt3_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QPushButton" name="pushButton_4">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/bt4_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QPushButton" name="pushButton_5">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/bt5_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QPushButton" name="pushButton_6">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/bt6_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QPushButton" name="pushButton_7">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/bt7_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QPushButton" name="pushButton_8">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/bt8_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QPushButton" name="pushButton_9">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/bt9_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QPushButton" name="pushButton_1">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/bt1_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QPushButton" name="pushButton_ac">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/btac_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QPushButton" name="pushButton_0">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/bt0_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QPushButton" name="pushButton_del">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>95</width>
+        <height>95</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>40</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/pic/btdel_up.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QPushButton" name="login_button">
+   <property name="geometry">
+    <rect>
+     <x>900</x>
+     <y>180</y>
+     <width>250</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>100</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>25</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-image: url(:/pic/log_up.png);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_kings">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>50</y>
+     <width>800</width>
+     <height>60</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>25</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 153, 51);</string>
+   </property>
+   <property name="text">
+    <string>Kings #66 Lane 5</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="big_button">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1280</width>
+     <height>800</height>
+    </rect>
+   </property>
+   <property name="cursor">
+    <cursorShape>BlankCursor</cursorShape>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-image: url(:/pic/zero.png);</string>
+   </property>
+   <property name="text">
+    <string>now will shutdown the screen!</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="version_label">
+   <property name="geometry">
+    <rect>
+     <x>1010</x>
+     <y>20</y>
+     <width>240</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>15</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-image: url(:/pic/zero.png);
+color: rgb(255, 153, 51);</string>
+   </property>
+   <property name="text">
+    <string>Version</string>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="photo.qrc"/>
+ </resources>
+ <connections/>
+</ui>

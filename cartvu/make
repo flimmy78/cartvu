@@ -1,0 +1,18 @@
+#!/bin/sh
+
+source=test_network.c
+target=network
+flag=-Wall
+ip=192.168.1.139
+root=root
+passwd=1
+
+arm-linux-gcc $source -o $target $flag
+
+
+echo "open $ip 21
+      user $root $passwd
+      binary
+      put $target
+      close
+      bye" |ftp -in 

@@ -1,0 +1,1258 @@
+
+
+#include <QDebug>
+#include <QtCore/QFile>
+#include <QtCore/QTextStream>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <strings.h>
+#include <string.h>
+#include "read_sys.h"
+
+extern char *arg_main;
+
+QString global_lane_no;
+QString global_kings_name;
+unsigned int global_cashier_timeout;
+
+extern global_config *global_conf_sys;
+
+
+extern login *global_log;
+
+
+extern camThread *global_camera;
+
+extern watchdog *global_wdg;
+
+synchTime  *global_syn_time;
+
+
+read_sys::read_sys()
+{
+
+}
+
+read_sys::~read_sys()
+{
+
+}
+
+read_sys::read_sys(global_config * p)
+{    
+    out_config_sys = p;
+    //sys_decode(CFG_SYS);
+
+    /*
+    qDebug() << "\n\nstart the watchdog timer\n\n";
+    connect(&watchdog_timer, SIGNAL(timeout()), this, SLOT(feed_dog_count()));
+    //watchdog_timer.start(MAIN_FEED_TIMER*1000);
+    watchdog_timer.start(1*1000);
+*/
+}
+
+/*
+void read_sys::feed_dog_count()
+{
+    global_wdg->count = 0;
+    qDebug() << "int read_sys file and feed the dog count to 0"    ;
+
+}
+*/
+
+void read_sys::zone_swap(char *p)
+{
+    if (p[0] == '-')
+        p[0] = '+';
+    else
+        p[0] = '-';
+}
+unsigned int read_sys::qstring_to_sec_time(QString time)
+{
+    int hour;
+    int min;
+    int sec;
+    int all_sec;
+    hour = time.mid(0, 2).toInt();
+    min = time.mid(3, 2).toInt();
+    sec = time.mid(6, 2).toInt();
+//    qDebug("=================================\n");
+//    qDebug("hour is %d\n", hour);
+//    qDebug("min is %d\n", min);
+//    qDebug("sec is %d\n", sec);
+    all_sec = hour*3600 + min*60 + sec;
+    return all_sec;
+
+}
+void read_sys::par_analyse(QString line, global_config *config_sys)
+{
+    QString arg;
+    QString value;
+    QString tmp_value;
+
+    int pos;
+   // char *time_zone;
+    char *str;
+    char zone[ZONE_STR_SIZE];
+    QByteArray tmp;
+    pos = line.indexOf('=', 0);
+    arg = line.left(pos).toLower().trimmed();
+    value = line.right(line.length() - pos -1).trimmed();
+    qDebug() << arg << "value is " << value;
+
+    if (arg.compare("localserver") == 0) {
+        tmp = value.toLatin1();
+        str = tmp.data();
+        strcpy(config_sys->sys_network.local_server, str);
+        //config_sys->down_load(config_sys->sys_network.local_server, "/cartvu/config/config.sys", "/download/config.sys", "/var/log/down_load_error");
+        //qDebug("=================================\n");
+        //qDebug("local server is %s\n", config_sys->sys_network.local_server);
+        //qDebug("=================================\n");
+    } else if (arg.compare("openningtime") == 0) {
+        config_sys->sys_global.openning_time = qstring_to_sec_time(value);
+        //qDebug("openning time is %d\n", config_sys->sys_global.openning_time);
+    } else if (arg.compare("closingtime") == 0) {
+        config_sys->sys_global.closing_time = qstring_to_sec_time(value);
+    } else if (arg.compare("timezone") == 0) {
+//        tmp = value.toLatin1();
+//        time_zone = tmp.data();
+//        //调换符号
+//        zone_swap(time_zone);
+        bzero(zone, ZONE_STR_SIZE);
+        //snprintf(zone, ZONE_STR_SIZE, "GMT%s", time_zone);
+        config_sys->sys_global.time_zone = value.toInt();
+        snprintf(zone, ZONE_STR_SIZE, "GMT%+d", -(config_sys->sys_global.time_zone));
+        //qDebug("%s", zone);
+        //my_system("date -R");
+        //setenv("TZ", zone, 1);
+       // my_system("date -R");
+    } else if (arg.compare("savingtime") == 0) {
+        config_sys->sys_global.saveing_time = value.toInt();
+    } else if (arg.compare("brightness") == 0) {
+        config_sys->sys_global.brightness= value.toInt();
+    } else if (arg.compare("workingmode") == 0) {
+        config_sys->sys_working_mode.working_mode = value.toInt();
+    } else if (arg.compare("cameratype") == 0) {
+        config_sys->sys_working_mode.camera_type = value.toInt();
+    }else if (arg.compare("isnumber") == 0) {
+        config_sys->sys_working_mode.I_number = value.toInt();
+    } else if (arg.compare("e2timeout") == 0) {
+        config_sys->sys_working_mode.E2_time_out = value.toInt();
+    } else if (arg.compare("alarminterval") == 0) {
+        config_sys->sys_working_mode.alarm_interval = value.toInt();
+    } else if (arg.compare("blinkingtime") == 0) {
+        config_sys->sys_alarm.blinking_time = value.toInt();
+    } else if (arg.compare("imagetime") == 0) {
+        config_sys->sys_alarm.image_time = value.toInt();
+    } else if (arg.compare("alarmmode") == 0) {
+        config_sys->sys_alarm.alarm_mode = value.toInt();
+    } else if (arg.compare("alarmid") == 0) {
+        config_sys->sys_alarm.alarm_id = value.toInt();
+    } else if (arg.compare("alarmvolume") == 0) {
+        config_sys->sys_alarm.alarm_volume = value.toInt();
+    } else if (arg.compare("alarmmsg") == 0) {
+        config_sys->sys_alarm.alarm_msg = value.toInt();
+    } else if (arg.compare("standbymode") == 0) {
+        config_sys->sys_standby.standby_mode = value.toInt();
+    } else if (arg.compare("revolverange") == 0) {
+        //from 0  to find the string "--"
+        pos = value.indexOf("--", 0);
+        if (pos < 0) {
+            qDebug("using the '-' to separate\n");
+            pos = value.indexOf("-", 0);
+            config_sys->sys_standby.revolve_range.end= value.right(value.length() - pos - 1).toInt();
+        } else {
+            config_sys->sys_standby.revolve_range.end= value.right(value.length() - pos - 2).toInt();
+        }
+        config_sys->sys_standby.revolve_range.start= value.left(pos).toInt();
+//        qDebug("=================================\n");
+//        qDebug("pos is %d", pos);
+//        qDebug("start is %d",config_sys->sys_standby.revolve_range.start);
+//        qDebug("end is %d",config_sys->sys_standby.revolve_range.end);
+    } else if (arg.compare("revolveperiod") == 0) {
+        config_sys->sys_standby.revolve_period = value.toInt();
+    } else if (arg.compare("imagequality") == 0) {
+        config_sys->sys_other.image_quality = value.toInt();
+    } else if (arg.compare("extraiteminfo") == 0) {
+        config_sys->sys_other.extra_iteam_info = value.toInt();
+    } else if (arg.compare("resettime") == 0) {
+        config_sys->sys_other.reset_time = qstring_to_sec_time(value);
+    } else if (arg.compare("storename") == 0) {
+        tmp = value.toLatin1();
+        str = tmp.data();
+        strcpy(config_sys->sys_other.kings_name, str);
+        global_kings_name = QString(config_sys->sys_other.kings_name);
+    } else if (arg.compare("cashiertimeout") == 0) {
+        config_sys->sys_other.cashier_timeout = value.toInt();
+        global_cashier_timeout = config_sys->sys_other.cashier_timeout;
+    }
+}
+
+void read_sys::read_eth0(const char *arg)
+{
+    int pos;
+    QString line;
+    QString date;
+    QFile sys_file(arg);
+    QString left_string;
+    QString right_string;
+
+    if (sys_file.exists()) {
+        if (sys_file.open(QIODevice::ReadOnly)) {
+            QTextStream stream(&sys_file);
+            do {
+                line = stream.readLine().trimmed().toLower();             // 从文件中读入一行
+
+               //不解析空字符
+                if (line.compare("") == 0)
+                    continue;
+                pos = line.indexOf("=");
+                if (pos < 0) {
+                    continue;
+                } else {
+                    left_string = line.left(pos).trimmed();
+                    right_string = line.right(line.length() - pos - 1).trimmed();
+                    if (left_string.compare("mac") == 0) {
+                        full_mac = right_string;
+                        plain_mac = full_mac.replace(":", "");
+                        qDebug() << "\n======mac=======";
+                        qDebug() << plain_mac;
+                    } else if (left_string.compare("lane_no") == 0){
+                        lane_no = right_string;
+                        qDebug() << "\n======lane_no=======";
+                        qDebug() << lane_no;
+                        global_lane_no = lane_no;
+                    }
+                }
+            } while(!line.isNull());                // end of while
+
+        } else {
+            perror("open file fail");
+            //exit(1);
+        }
+    } else {
+        perror("config.sys file is not exit");
+        //exit(1);
+    }
+
+}
+
+void read_sys::sys_decode(const char *arg, global_config *conf)
+{
+    int pos;
+    QString line;
+    QString date;
+    QFile sys_file(arg);
+
+    if (sys_file.exists()) {
+        if (sys_file.open(QIODevice::ReadOnly)) {
+            QTextStream stream(&sys_file);
+            do {
+                line = stream.readLine();             // 从文件中读入一行
+                qDebug() << "!!!zero!!!!!";
+            } while (line.compare("") == 0);
+            //解析日期
+            decode_date_line(line, conf);
+            do {
+                line = stream.readLine();             // 从文件中读入一行
+                pos = line.indexOf(';', 0);              // 找到 ';'没找到则保留原来的值
+                line = line.left(pos);                  //取左边的';'
+                //line = line.replace(" ", "");       //去掉所有的' '
+                line = line.replace("\t", "");          //去掉tab
+                //line = line.toLower();                  // 转换成小写
+                //跳过'#'
+                pos = line.indexOf('#', 0);
+                line = line.left(pos);
+                //跳过'['
+                pos = line.indexOf('[', 0);
+                line = line.left(pos);         
+               // qDebug() << line;
+               //不解析空字符
+                if (line.compare("") == 0)
+                    continue;
+                //解析
+                par_analyse(line, conf);
+            } while(!line.isNull());                // end of while
+            sys_file.close();    // 关闭配置文件
+        } else {
+            perror("open file fail");
+            exit(1);
+        }
+        //unlink(CMD_FILE);         // 删除文件
+    } else {
+        perror("config.sys file is not exit");
+        //exit(1);
+    }
+}
+
+void read_sys::get_file_delay()
+{
+    QTime t;
+    restart_flag = false;
+    //int i = 10;
+   // while (i--) {
+        t= QTime::currentTime();
+        //Returns the millisecond part (0 to 999) of the time
+        //qDebug() << t.msec();
+        //qDebug() << t.second();
+        qsrand(t.msec()+t.second()*1000);
+
+        delay_time = qrand()% RANDOM_SCOPE;
+        qDebug("delay time is %d ", delay_time);
+   // }
+        connect(&random_timer, SIGNAL(timeout()), this, SLOT(random_delay()));
+        //as the base time start and count in the random_delay() and judge the delay_time;
+        random_timer.start(1*1000);
+
+        //has already download the newest 'config.sys' file
+        try_soft_count = 0;
+        connect(this, SIGNAL(config_ok()),this, SLOT(check_update_app()));
+        connect(this, SIGNAL(log_out_sig()), this, SLOT(log_out()));
+}
+
+
+void read_sys::check_update_app()
+{
+    QString cmd;
+
+
+    cmd = "GET /cgi-bin/software.cgi HTTP/1.1\r\nConnection:Close\r\n\r\n";
+    qDebug() << "log======================================log";
+    qDebug() << cmd;
+    this->http_client = new client(this->l_server, HTTP_PORT, cmd, &rec_string);
+    connect(http_client, SIGNAL(emit_receive()), this, SLOT(deal_update_app()));
+
+
+}
+
+
+void read_sys::deal_update_app()
+{
+    int start_pos;
+    QString receive;
+    QString tmp;
+    disconnect(http_client, SIGNAL(emit_receive()), this, SLOT(deal_update_app()));
+    if (http_client != NULL) {
+        http_client->deleteLater();
+    }
+
+    if (http_client->error_timeout == true) {
+        try_soft_count++;
+        if (try_soft_count < TEST_TIME_COUNT) {
+            qDebug() << "try another times and sleep 3 secs";
+             qDebug() << "\n******************************************\n";
+            sleep(3);
+            check_update_app();
+
+        } else {
+            qDebug() << "connect to host error, http request error!please check the network!";
+            sleep(1);
+            qDebug() << "try sofware update fail 5 times and will show here!";
+            global_conf_sys = out_config_sys;
+            sleep(1);
+            qDebug() << "show screen here with not the newest config.sys";
+            start_global_screen();
+        }
+    } else {
+
+
+
+        qDebug() << arg_main;
+        QString app_name_temp(arg_main);
+        app_name = app_name_temp;
+        int s_pos;
+
+        do {
+            s_pos = app_name.indexOf("/");
+            app_name = app_name.right(app_name.length() - s_pos -1);
+        } while(s_pos >=0);
+        qDebug() << app_name;
+
+
+
+
+
+
+
+        //delete delay_client;
+        if (http_client != NULL) {
+            //delete http_client;
+            http_client->deleteLater();
+        }
+        rec_string = rec_string.trimmed();
+        start_pos = rec_string.indexOf("HTTP/1.0");
+        if (start_pos < 0) {
+            qDebug() << "http request error! please check the local server";
+        } else {
+            start_pos = rec_string.indexOf("Connection: close");
+            rec_string = rec_string.right(rec_string.length() - start_pos - 17);
+            qDebug() << "now0000000000000000000000now";
+            qDebug() << rec_string;
+            start_pos = rec_string.indexOf("&");
+            if (start_pos < 0) {
+                qDebug() << "receive information is not right! please check what the local server send";
+            } else {
+                receive = rec_string.trimmed();
+                qDebug() << receive;
+                while ((start_pos = receive.indexOf("&")) >= 0) {
+                    tmp = receive.left(start_pos).trimmed();
+                    receive = receive.right(receive.length() - start_pos -1).trimmed();
+                    analyse_string(tmp);
+                }
+                //meant that is ok  and will logout
+                emit log_out_sig();
+            }
+
+        }
+        //qDebug() << "receive is ";
+        //qDebug() << rec_string;
+    }
+}
+
+void read_sys::analyse_string(QString tmp)
+{
+    int pos;
+  //cartvu=2.1&cartvuzip=1.3&..=...&..=..&
+    pos = tmp.indexOf("=");
+    if (pos >= 0) {
+        software_name = tmp.left(pos).trimmed();
+        software_ver = tmp.right(tmp.length() - pos - 1).trimmed().toLower();
+        qDebug() << "now the receive http #" + software_name + "#   version is " + software_ver;
+        pos = software_ver.indexOf(".");
+        if (pos < 0) {
+            software_major = software_ver;
+            software_minor = "0";
+        } else {
+            software_major = software_ver.left(pos);
+            software_minor = software_ver.right(software_ver.length() - pos - 1);
+        }
+        compare_version();
+    } else {
+        software_name = "";
+        software_ver = "";
+        qDebug() << "local server has send error information!";
+    }
+
+}
+
+void  read_sys::compare_version()
+{
+
+    char       buf[BUF_MAXSIZE];
+
+    char remote_path[BUF_MAXSIZE];
+    char local_path[BUF_MAXSIZE];
+
+    QString    command;
+
+    int column_num;
+    int row_num;
+    QString tmp;
+
+    int try_count = 0;
+
+
+
+
+    if (!QSqlDatabase::contains("qt_sql_default_connection"))
+        cartvu_db = QSqlDatabase::addDatabase("QSQLITE");
+
+    cartvu_db.setDatabaseName(BASE_DB);
+    if (!cartvu_db.open())
+    {
+        QMessageBox::critical(0, "Cannot open database", "Unabel to establise a database connection", QMessageBox::Cancel);
+        return  ;
+    } else {
+        qDebug() << "open database ok!";
+    }
+
+    query = QSqlQuery(cartvu_db);
+    bzero(buf, BUF_MAXSIZE);
+    sprintf(buf, "select *from  %s", CARTVU_VERSION);
+    //command = "select * from" + CARTVU_VERSION;
+    command = QString(QLatin1String(buf));
+    query.exec(command);
+
+    query.last();
+    row_num = query.at() + 1;
+
+    column_num = query.record().count();
+    //qDebug("row is %d  column is %d", row_num, column_num);
+
+    //return to the first before
+    query.first();
+    query.previous();
+    while(query.next())
+    {
+        //QByteArray	toLatin1 () const
+        tmp = query.value(0).toString();
+        major_ver = query.value(1).toString();
+        minor_ver = query.value(2).toString();
+        version = major_ver + "." + minor_ver;
+        //version = major_ver * 1000 +;
+        if (tmp.compare(software_name) == 0) {
+            //revise
+            if (version.toFloat() < software_ver.toFloat()) {
+
+
+
+
+                qDebug("datebase version is %f <  local send version is %f", version.toFloat(), software_ver.toFloat());
+                qDebug() << "will down load the newest file";
+                bzero(remote_path, BUF_MAXSIZE);
+                bzero(local_path, BUF_MAXSIZE);
+                snprintf(remote_path, BUF_MAXSIZE, "%s", query.value(4).toByteArray().data());
+                snprintf(local_path, BUF_MAXSIZE, "%s", query.value(5).toByteArray().data());
+
+
+                //qDebug("%s", remote_path);
+                qDebug("local path is %s", local_path);
+                strcat(remote_path, software_name.toLatin1().data());
+                qDebug("remote_path is %s", remote_path);
+                global_config c_sys;
+
+
+
+                do {
+                    try_count++;
+
+                    //根据数据库里面的信息及路径下载相关软件  download to "/cartvu/temp/ori_tmp"
+                    c_sys.down_load(ftp_user, ftp_passwd, local_server, ORI_TMP, remote_path, ERROR_DOWNLOAD);
+
+                    if (c_sys.down_load_ok == true) {
+                        check_flag = software_check(ORI_TMP);
+                        if (check_flag == true) {
+
+                        }
+                    }
+
+                    if (software_name.compare(app_name) == 0) {
+                        c_sys.down_load(ftp_user, ftp_passwd, local_server, DEFAULT_LOCAL_PATH, remote_path, ERROR_DOWNLOAD);
+                        if (c_sys.down_load_ok == true) {
+                            restart_flag = true;
+                        } else {
+
+                            qDebug() << "delete the file";
+                        }
+                    } else {
+                        c_sys.down_load(ftp_user, ftp_passwd, local_server, local_path, remote_path, ERROR_DOWNLOAD);
+                    }
+
+                    if (c_sys.down_load_ok == true) {
+
+                        /* need to check the file to be ok */
+                        //
+
+                        qDebug() << "download is ok ! update the sqlite3 ";
+                        update_sqlite3();
+                        break;
+                    }
+
+
+
+            } while (try_count < DOWNLOAD_COUNT);
+
+
+            } else {
+                qDebug() << "no need to update" << software_ver << "in Version sqlite3";
+            }
+        }
+
+    }
+    cartvu_db.close();
+}
+
+void read_sys::update_sqlite3()
+{
+    QString now_time;
+    char       buf[BUF_MAXSIZE];
+    QString    command;
+    bool ret;
+
+    //update date
+    current_time = QDateTime::currentDateTime();
+    //current_time().toString("yyyy-MM-dd hh:mm:ss");
+    qDebug() << current_time.toString("yyyy-MM-dd hh:mm:ss");
+    now_time = current_time.toString("yyyy-MM-dd");
+
+    //update major  minor  date ;
+    bzero(buf, BUF_MAXSIZE);
+    //update Version set Version = '2', MinorVer = '1', UpdateDate = '2013-09-09' where Software = 'cartvu'
+    sprintf(buf, "update %s set Version = %s, MinorVer = %s, UpdateDate = '%s' where Software = '%s'",
+            CARTVU_VERSION, software_major.toLatin1().data(), software_minor.toLatin1().data(), now_time.toLatin1().data(), software_name.toLatin1().data());
+    //command = "select * from" + CARTVU_VERSION;
+    command = QString(QLatin1String(buf));
+    qDebug() << command;
+    ret = query.exec(command);
+    if (ret == false) {
+        qDebug() << "query exec fail";
+    } else {
+        qDebug() << "query exec ok!";
+    }
+
+}
+
+
+void read_sys::log_out()
+{
+    QString cmd;
+
+
+    cmd = "GET /cgi-bin/logout.cgi HTTP/1.1\r\nConnection:Close\r\n\r\n";
+    this->http_client = new client(this->l_server, HTTP_PORT, cmd, &rec_string);
+    connect(http_client, SIGNAL(emit_receive()), this, SLOT(is_logout_ok()));
+
+
+
+}
+void read_sys::reset_machine()
+{
+    disconnect(&reset_timer, SIGNAL(timeout()), this, SLOT(reset_machine()));
+    qDebug() << "will reset the machine";
+    sleep(1);
+    qDebug() << "will reset the machine";
+    sleep(1);
+    my_system("/sbin/reboot");
+
+}
+
+void read_sys::closing_machine()
+{
+    unsigned int dif_value;
+
+    closing_timer.stop();
+    disconnect(&closing_timer, SIGNAL(timeout()), this, SLOT(closing_machine()));
+    connect(&openning_timer, SIGNAL(timeout()), this, SLOT(openning_machine()));
+    // qDebug() << "\nyou are in the closing time!";
+    dif_value = 24*3600 - global_conf_sys->sys_global.closing_time + global_conf_sys->sys_global.openning_time;
+
+    //qDebug("the machine will open after %d sec", dif_value);
+    dif_value = 10;
+
+    //closing_light();
+    openning_timer.start(dif_value*1000);
+    //system("echo 'closing the machine'>/dev/ttySAC0");
+}
+
+
+
+
+void read_sys::closing_light()
+{
+    int fd = -1;
+    int ret = -1;
+    unsigned int fre;
+
+    fd = open(PWM_BACK_LIGHT, O_RDWR);
+    if(fd < 0) {
+        perror("open back light fail");
+        //exit(1);
+    }
+    fre = 100000;
+    //ret = ioctl(fd, PWM_IOCTL_SET_FREQ, fre);
+    ret = ioctl(fd, PWM_IOCTL_STOP, fre);
+    if(ret < 0) {
+        perror("ioctl fail");
+        //exit(1);
+    }
+    close(fd);
+}
+
+
+
+
+
+
+void read_sys::openning_light()
+{
+    int fd = -1;
+    int ret = -1;
+    unsigned int fre;
+
+    fd = open(PWM_BACK_LIGHT, O_RDWR);
+    if(fd < 0) {
+        perror("open back light fail");
+        //exit(1);
+    }
+    fre = 1000000;
+    ret = ioctl(fd, PWM_IOCTL_SET_FREQ, fre);
+    if(ret < 0) {
+        perror("ioctl fail");
+        //exit(1);
+    }
+    close(fd);
+}
+
+void read_sys::openning_machine()
+{
+    int dif_value;
+
+    openning_timer.stop();
+    dif_value = global_conf_sys->sys_global.closing_time - global_conf_sys->sys_global.openning_time;
+
+    //qDebug() << "\nyou are in the openning time!";
+    //qDebug() << "dif_value is " << dif_value;
+    disconnect(&openning_timer, SIGNAL(timeout()), this, SLOT(openning_machine()));
+    connect(&closing_timer, SIGNAL(timeout()), this, SLOT(closing_machine()));
+
+    if (dif_value < 0) {
+        dif_value = 10;
+        qDebug() << "error happen";
+    } else {
+        //qDebug("the machine will close after %d sec", dif_value);
+        dif_value = 10;
+    }
+
+    //openning_light();
+    closing_timer.start(dif_value*1000);
+    //system("echo 'openning the machine'>/dev/ttySAC0");
+}
+void read_sys::is_logout_ok()
+{
+    int start_pos;
+    QString receive;
+    QString tmp;
+    disconnect(this->http_client, SIGNAL(emit_receive()), this, SLOT(is_logout_ok()));
+    //delete this->http_client;
+
+    if (http_client != NULL) {
+        //delete http_client;
+        http_client->deleteLater();
+    }
+
+    rec_string = rec_string.trimmed();
+    start_pos = rec_string.indexOf("HTTP/1.0");
+    if (start_pos < 0) {
+        qDebug() << "http request error! please check the local server";
+    } else {
+        start_pos = rec_string.indexOf("Connection: close");
+        rec_string = rec_string.right(rec_string.length() - start_pos - 17);
+        receive = rec_string.trimmed();
+        qDebug() << "log out information!!!!!!!!!!";
+        qDebug() << receive;
+        if (receive.compare("logout ok!") == 0) {
+            qDebug() << "start main process";
+            //start_main_qt();
+        }
+    }
+    qDebug() << "@@@@@@@@@@@@@@@@@@@@@test@@@@@@@@@@@@@@@@@@@@@@@@";
+    if (restart_flag == true) {
+        qDebug() << "will start another cartvu and exit and sleep 3";
+        sleep(3);
+        qDebug() << "will start another cartvu and exit and sleep 3";
+        my_system("/etc/init.d/ifconfig-eth0-setting.sh");
+        global_wdg->set_watdog_time();
+        qDebug() << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~the last set watchdog~~~~~~~~~~~~~~~~~~~~~~~\n";
+
+        //will kill it in the shell
+        //exit(1);
+        //system("/sbin/reboot");
+    } else {
+        sleep(1);
+        qDebug() << "no reboot";
+        qDebug() << "will show here!";
+
+        start_global_screen();
+
+
+
+    }
+}
+
+
+
+
+void read_sys::start_global_screen()
+{
+    global_log->show();
+    initial_all_global_config();
+
+}
+
+void read_sys::initial_all_global_config()
+{
+    qDebug() << "\nstart******************************************start\n";
+
+    //light adjust
+    lgt = new light(global_conf_sys->sys_global.brightness);
+    connect(&lgt_timer, SIGNAL(timeout()),lgt,  SLOT(light_adjust()));
+    lgt_timer.start(ADJUST_BAKLIGHT_INTERVAL*1000);
+
+
+
+
+
+    initial_part_global_config();
+    image_quality_fun();
+
+    // start when the config.sys is ok
+    //global_log->global_status.start(GLOBAL_TIMER*1000);
+    global_log->mac_log_flag = false;
+
+
+    qDebug() << "\n!!!!!!!!!!!!!!synchronization the system time!!!!!!!!!!!!\n";
+/*
+    global_syn_time = new synchTime();
+
+    global_syn_time->getTimeInformation();
+    sleep(3);
+    global_syn_time->timeSynchronization();
+    */
+    qDebug() << "\n!!!!!!!!!!!!!!synchroni is ok!!!!!!!!!!!!!\n";
+    //global_conf_sys = NULL;
+    //delete global_conf_sys;
+   // my_system("/sbin/reboot");
+}
+
+
+void read_sys::initial_part_global_config()
+{
+    unsigned int now_size_time;
+    unsigned int dif_value;
+    QDateTime now_time;
+    QString tmp;
+    now_time = QDateTime::currentDateTime();
+    tmp = now_time.toString("hh:mm:ss");
+    qDebug() << "now the time is " << tmp;
+    now_size_time  = qstring_to_sec_time(tmp);
+
+    if (global_conf_sys->sys_global.closing_time < now_size_time) {
+        dif_value = 10;
+        qDebug() << "closing time is bigger than the current time";
+    } else {
+        dif_value = global_conf_sys->sys_global.closing_time - now_size_time;
+        qDebug("the machine will close after %d sec", dif_value);
+        dif_value = 10;
+    }
+
+
+
+    qDebug() << "now the time@@@@@@@@@@@@@@@@@@@@@@is @@@@@@";
+    qDebug() << global_conf_sys->sys_global.closing_time;
+    qDebug() << global_conf_sys->sys_global.openning_time;
+
+    connect(&closing_timer, SIGNAL(timeout()), this, SLOT(closing_machine()));
+
+    qDebug() << "wait for the closing time!!!!!!!!";
+    closing_timer.start(dif_value*1000);
+
+    if (global_conf_sys->sys_other.reset_time > now_size_time) {
+        dif_value = global_conf_sys->sys_other.reset_time - now_size_time;
+    } else {
+        dif_value = 24*3600 - now_size_time + global_conf_sys->sys_other.reset_time;
+    }
+    qDebug("the reset time is %d", dif_value);
+    connect(&reset_timer, SIGNAL(timeout()), this, SLOT(reset_machine()));
+
+    reset_timer.start(dif_value*1000);
+//    qDebug() << "will show here!";
+//    sleep(1);
+//    global_log->show();
+
+}
+
+
+void read_sys::image_quality_fun()
+{
+    switch(global_conf_sys->sys_other.image_quality) {
+    case IMAGE_QUALITY_H:
+        global_camera->now_image_quality = IMAGE_QUALITY_H_PER;
+        break;
+    case IMAGE_QUALITY_M:
+        global_camera->now_image_quality = IMAGE_QUALITY_M_PER;
+        break;
+    case IMAGE_QUALITY_L:
+        global_camera->now_image_quality = IMAGE_QUALITY_L_PER;
+        break;
+    default:
+        global_camera->now_image_quality = IMAGE_QUALITY_HH_PER;
+        break;
+    }
+
+    qDebug("image qualite is %d", global_camera->now_image_quality);
+
+}
+
+void read_sys::random_delay()
+{
+    static int count = 0;
+    count++;
+    if (count > delay_time) {
+        random_timer.stop();
+        qDebug() << "start";
+        qDebug() << "delay for" << delay_time;
+        down_load_test();
+
+    } else {
+        qDebug() << "wait " << count << "second!";
+    }
+}
+
+void read_sys::down_load_test()
+{
+    delay_client = new client();
+    l_server = QString(out_config_sys->sys_network.local_server);
+    bzero(local_server, FTP_SIZE);
+    strcpy(local_server, out_config_sys->sys_network.local_server);
+    qDebug() << "local server is ";
+    qDebug() << l_server;
+    //3x2=6sec
+    delay_client->test_server_port(l_server, HTTP_PORT, TEST_TIME_OUT, TEST_TIME_COUNT);
+    //delay_client->test_server_port("192.168.1.109", HTTP_PORT, TEST_TIME_OUT, TEST_TIME_COUNT);
+    connect(delay_client, SIGNAL(now_sate()), this, SLOT(down_load_file()));
+
+}
+
+#define CMD_LEN_SIZE   10
+void read_sys::down_load_file()
+{
+    QString cmd;
+    //QString tmp;
+    //char length[CMD_LEN_SIZE];
+    disconnect(delay_client, SIGNAL(now_sate()), this, SLOT(down_load_file()));
+    //tmp = "";
+    //snprintf(length, CMD_LEN_SIZE, "%d", tmp.length());
+    //manager->get(QNetworkRequest(QUrl("http://192.168.1.59/cgi-bin/software.cgi")));
+    //cmd = "GET /cgi-bin/dealRequest.cgi?MAC=18:90:18:00:00:00 HTTP/1.1\r\nConnection:Close\r\n\r\n";
+
+
+
+    //cmd = "GET /cgi-bin/software.cgi HTTP/1.1\r\nConnection:Close\r\n\r\n";
+
+
+    qDebug() << "here to going to try mac";
+    if (delay_client->connect_state == true) {
+
+        delete delay_client;
+        delay_client = NULL;
+        qDebug() << "connect ok!";
+        //qDebug() << "sleep 3!!!!!!!!!!!!!";
+        //sleep(3);
+        post_mac();
+
+
+    } else {
+        //start the man interrupt
+        qDebug() << "connect to local server fail and start another screen!";
+        qDebug() << "start the original cartvu app and sleep 3";
+        sleep(1);
+        qDebug() << "sleep 1";
+        sleep(1);
+        qDebug() << "sleep 2";
+        sleep(1);
+        qDebug() << "sleep 3";
+        qDebug() << "no reboot";
+
+        //point to the original config.sys
+        global_conf_sys = out_config_sys;
+
+        qDebug() << "will show here!";
+        start_global_screen();
+    }
+    //delete delay_client;
+   //delay_client = NULL;
+}
+
+
+void read_sys::post_mac()
+{
+    QString cmd;
+    QString tmp;
+    char buf[BUF_SIZE];
+
+    tmp = plain_mac;
+    qDebug() << "plain_mac is " << tmp;
+    tmp = tmp.left(6);
+    bzero(ftp_user, FTP_SIZE);
+    //lower case
+    snprintf(ftp_user, FTP_SIZE,"F%s", tmp.toLower().toLatin1().data());
+    qDebug("user is %s\n", ftp_user);
+
+
+    tmp = plain_mac;
+    bzero(buf, BUF_SIZE);
+    snprintf(buf, BUF_SIZE, "POST /cgi-bin/login.cgi HTTP/1.1\r\nContent-Length:%d\n\n%s\r\n\r\n",
+            tmp.length(), tmp.toLatin1().data());
+    cmd = QString(buf);
+    qDebug() << cmd;
+    http_client = new client(l_server, HTTP_PORT, cmd, &rec_string);
+    connect(http_client, SIGNAL(emit_receive()), this, SLOT(info_flash()));
+}
+
+
+
+void read_sys::info_flash()
+{
+    static int try_mac_count = 0;
+    int start_pos;
+    QString receive;
+    QString tmp;
+
+    disconnect(http_client, SIGNAL(emit_receive()), this, SLOT(info_flash()));
+    if (http_client != NULL) {
+        http_client->deleteLater();
+    }
+    //error time out
+    if (http_client->error_timeout == true) {
+        try_mac_count++;
+        if (try_mac_count < TEST_TIME_COUNT) {
+            post_mac();
+        } else {
+            sleep(1);
+            qDebug() << "try mac fail 5 times and will show here!";
+            global_conf_sys = out_config_sys;
+            sleep(1);
+            qDebug() << "show screen here with not the newest config.sys";
+            start_global_screen();
+        }
+        // normal
+    } else {
+
+        rec_string = rec_string.trimmed();
+        start_pos = rec_string.indexOf("HTTP/1.0");
+        if (start_pos < 0) {
+            qDebug() << "http request error! mac log error please check the local server";
+        } else {
+            start_pos = rec_string.indexOf("Connection: close");
+            rec_string = rec_string.right(rec_string.length() - start_pos - 17);
+            qDebug() << "ok=========================ok";
+            qDebug() << rec_string;
+            start_pos = rec_string.indexOf("&");
+            if (start_pos < 0) {
+                qDebug() << "receive information is not right! please check what the local server send";
+            } else {
+                receive = rec_string.trimmed();
+                qDebug() << receive;
+                receive += "&";
+                //ok!ftppwd=h5s6q7w1&userpwd=car1998&
+                start_pos = receive.indexOf("ok!");
+                if (start_pos >=0) {
+                    receive = receive.right(receive.length() - start_pos -3);
+                    qDebug() << receive;
+                    while ((start_pos = receive.indexOf("&")) >= 0) {
+                        tmp = receive.left(start_pos).trimmed();
+                        receive = receive.right(receive.length() - start_pos -1).trimmed();
+                        analyse_passwd(tmp);
+                    }
+                    //qDebug() << "ok!!!!!!!!!!!!!!!!!!!and sleep 3";
+                    //sleep(3);
+                    emit config_ok();
+                } else {
+                    qDebug() << "local server has not send the 'ok!'";
+                }
+                //meant that is ok  and will logout
+
+            }
+
+        }
+    }
+}
+
+
+void read_sys::analyse_passwd(QString tmp)
+{
+    int pos;
+    QString left_string;
+    QString right_string;
+    struct tm now_conf_time;
+    unsigned long int conf_time[2];
+    char buf[BUF_SIZE];
+  //ftppwd=h5s6q7w1&userpwd=car1998
+    pos = tmp.indexOf("=");
+    if (pos >= 0) {   
+        left_string = tmp.left(pos).trimmed().toLower();
+        right_string = tmp.right(tmp.length() - pos - 1).trimmed().toLower();
+        if (left_string.compare("ftppwd") == 0) {
+            bzero(ftp_passwd, FTP_SIZE);
+            snprintf(ftp_passwd, FTP_SIZE, "%s", right_string.toLatin1().data());
+            qDebug("ftp passwd is %s ", ftp_passwd);
+
+            //now_conf_sys = global_conf_sys;
+            //global_config now_conf_sys;
+//down_load(const char * user, const char * passwd, const char * local_server, const char * des_file, const char * sour_file, const char *des_error)
+            global_conf_sys->down_load(ftp_user, ftp_passwd, local_server, TMP_FILE, DOWN_LOAD_CONFIG_SYS, ERROR_DOWNLOAD);
+
+            if (global_conf_sys->down_load_ok == true) {
+                qDebug() << "download from local server is ok!";
+                this->sys_decode(TMP_FILE, global_conf_sys);
+
+                now_conf_time.tm_sec   = global_conf_sys->sys_mod_date.sec;
+                now_conf_time.tm_min   = global_conf_sys->sys_mod_date.min;
+                now_conf_time.tm_hour  = global_conf_sys->sys_mod_date.hour;
+                now_conf_time.tm_mday  = global_conf_sys->sys_mod_date.mday;
+                now_conf_time.tm_mon   = global_conf_sys->sys_mod_date.mon;
+                now_conf_time.tm_year  = global_conf_sys->sys_mod_date.year - 1900;
+                now_conf_time.tm_wday  = 0;
+                now_conf_time.tm_yday  = 0;
+                now_conf_time.tm_isdst = 0;
+                conf_time[0] = mktime(&now_conf_time);
+
+                now_conf_time.tm_sec   = out_config_sys->sys_mod_date.sec;
+                now_conf_time.tm_min   = out_config_sys->sys_mod_date.min;
+                now_conf_time.tm_hour  = out_config_sys->sys_mod_date.hour;
+                now_conf_time.tm_mday  = out_config_sys->sys_mod_date.mday;
+                now_conf_time.tm_mon   = out_config_sys->sys_mod_date.mon;
+                now_conf_time.tm_year  = out_config_sys->sys_mod_date.year - 1900;
+                now_conf_time.tm_wday  = 0;
+                now_conf_time.tm_yday  = 0;
+                now_conf_time.tm_isdst = 0;
+                conf_time[1] = mktime(&now_conf_time);
+
+                qDebug() << "now download is ================";
+                qDebug() << global_conf_sys->sys_mod_date.year << global_conf_sys->sys_mod_date.mon << global_conf_sys->sys_mod_date.mday << global_conf_sys->sys_mod_date.hour <<
+                        global_conf_sys->sys_mod_date.min << global_conf_sys->sys_mod_date.sec;
+                qDebug() << "before is ================";
+                qDebug() << out_config_sys->sys_mod_date.year << out_config_sys->sys_mod_date.mon << out_config_sys->sys_mod_date.mday << out_config_sys->sys_mod_date.hour <<
+                        out_config_sys->sys_mod_date.min << out_config_sys->sys_mod_date.sec;
+                qDebug("now %ld    before is %ld", conf_time[0], conf_time[1]);
+                if (conf_time[0] > conf_time[1]) {
+                    bzero(buf, BUF_SIZE);
+                    snprintf(buf, BUF_SIZE, "/bin/cp %s %s", TMP_FILE, CFG_SYS);
+                    qDebug("%d\n", global_conf_sys->sys_working_mode.working_mode);
+                    my_system(buf);
+                    qDebug() << "will cp the config.sys to /cartvu/config/config.sys";
+                } else {
+                    qDebug() << "not cp the config.sys to /cartvu/config/config.sys";
+                }
+
+            }
+        } else if (left_string.compare("userpwd") == 0) {
+            bzero(user_passwd, FTP_SIZE);
+            snprintf(user_passwd, FTP_SIZE, "%s", right_string.toLatin1().data());
+            qDebug("user passwd is %s ", user_passwd);
+
+
+        } else {
+           qDebug() << "local server has send error left value!";
+        }
+    } else {
+        qDebug() << "local server has send error information!";
+    }
+
+}
+
+/*
+ *passwd:meant the passwd you want to compare
+ *dir:  meant the crypt passwd dir where you save
+ */
+void read_sys::decode_passwd(const char *passwd, const char *dir)
+{
+    int pos;
+    QString line;
+    QString date;
+    QFile sys_file(dir);
+
+    if (sys_file.exists()) {
+        if (sys_file.open(QIODevice::ReadOnly)) {
+            QTextStream stream(&sys_file);
+            do {
+                line = stream.readLine();             // 从文件中读入一行
+                pos = line.indexOf("encry_passwd");
+                qDebug() << "r===============r";
+                qDebug() << line;
+                if (pos >= 0) {
+                    pos = line.indexOf(':', 0);
+                    if (pos > 0) {
+                        encode_passwd = line.right(line.length() - pos - 1);
+                        qDebug() << encode_passwd;
+                        break;
+                    }
+                }
+                if (line.compare("") == 0)
+                    continue;
+            } while(!line.isNull());                // end of while
+            sys_file.close();    // 关闭配置文件
+        } else {
+            perror("open file fail");
+            exit(1);
+        }
+        //unlink(CMD_FILE);         // 删除文件
+    } else {
+        qDebug("%s is not exit\n", dir);
+        //exit(1);
+    }
+
+
+    bzero(en_passwd, PASSWD_SIZE);
+    strcpy(en_passwd, encode_passwd.toLatin1().data());
+    qDebug("the file passwd  is %s\n", en_passwd);
+    char now_passwd[30] = "car1998";
+    char slat[2];
+    slat[0] = now_passwd[0];
+    slat[1] = now_passwd[1];
+    strcpy(now_passwd, crypt(now_passwd, slat));
+    qDebug("now the car1998 is %s\n", now_passwd);
+
+
+
+    slat[0] = passwd[0];
+    slat[1] = passwd[1];
+    strcpy(now_passwd, crypt(passwd, slat));
+    qDebug("now the input passwd is %s\n", now_passwd);
+    if (strncmp(en_passwd, now_passwd, 13) == 0) {
+        qDebug() << "equal";
+    } else {
+        qDebug() << "the passwd is not equal";
+    }
+}
+
+
+void read_sys::decode_date_line(QString line, global_config *config_sys)
+{
+    int pos;
+    QString date;  
+
+    pos = line.indexOf(';', 0);              // 找到 ';'没找到则保留原来的值
+    line = line.left(pos);                  //取左边的';'
+    line = line.replace(" ", "");       //去掉所有的' '
+    line = line.toLower();                  // 转换成小写
+    //line = line.trimmed();                   //去掉前后的空格
+    qDebug() << endl << "now the modify time of config.sys file  is ";
+    qDebug() << line;
+    qDebug() << endl;
+   // date = line.section(&line, 0, 3); 
+    //2013-08-1617:43:00
+    
+    config_sys->sys_mod_date.year = line.mid(0, 4).toInt();
+    config_sys->sys_mod_date.mon = line.mid(5, 2).toInt();
+    config_sys->sys_mod_date.mday = line.mid(8, 2).toInt();
+
+#if 0
+    config_sys->sys_mod_date.hour = line.mid(10, 2).toInt();
+    config_sys->sys_mod_date.min = line.mid(13, 2).toInt();
+    config_sys->sys_mod_date.sec = line.mid(16, 2).toInt();
+#else
+    config_sys->sys_mod_date.hour = 0;
+    config_sys->sys_mod_date.min = 0;
+    config_sys->sys_mod_date.sec = 0;
+#endif
+
+#if 0
+    date = line.mid(0, 4);
+    date = line.mid(5, 2);
+    date = line.mid(8, 2);
+    date = line.mid(10, 2);
+    date = line.mid(13, 2);
+    date = line.mid(16, 2);
+    qDebug() << "year is " << config_sys->sys_mod_date.year << "mon is " << config_sys->sys_mod_date.mon << "mday is " << config_sys->sys_mod_date.mday;
+    qDebug() << "hour is " << config_sys->sys_mod_date.hour << "min is " << config_sys->sys_mod_date.min << "sec is " << config_sys->sys_mod_date.sec;
+#endif
+
+#if 0
+    pos = line.indexOf('-', 0);
+    date = line.left(pos);
+    date = date.trimmed();
+    qDebug() << "year is " << date;
+    qDebug() << "length is " << line.length() << endl;
+    date = line.right(line.length() - pos -1);
+    qDebug() << date;
+#endif
+    
+
+}
+
+

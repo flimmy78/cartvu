@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE keyboard>
+<keyboard type="eng">
+  <key nr="1" text="q" caps="Q" num="1"/> 
+  <key nr="2" text="w" caps="W" num="2"/> 
+  <key nr="3" text="e" caps="E" num="3"/> 
+  <key nr="4" text="r" caps="R" num="4"/> 
+  <key nr="5" text="t" caps="T" num="5"/> 
+  <key nr="6" text="y" caps="Y" num="6"/> 
+  <key nr="7" text="u" caps="U" num="7"/> 
+  <key nr="8" text="i" caps="I" num="8"/> 
+  <key nr="9" text="o" caps="O" num="9"/> 
+  <key nr="10" text="p" caps="P" num="0"/> 
+
+  <key nr="11" text="a" caps="A" num="~" /> 
+  <key nr="12" text="s" caps="S" num="`" /> 
+  <key nr="13" text="d" caps="D" num="!" /> 
+  <key nr="14" text="f" caps="F" num="@" /> 
+  <key nr="15" text="g" caps="G" num="#" /> 
+  <key nr="16" text="h" caps="H" num="$" /> 
+  <key nr="17" text="j" caps="J" num="%" /> 
+  <key nr="18" text="k" caps="K" num="^" /> 
+  <key nr="19" text="l" caps="L" num="&amp;" /> 
+  <key nr="20" text="z" caps="Z" num="*" /> 
+  <key nr="21" text="x" caps="X" num="(" /> 
+  <key nr="22" text="c" caps="C" num=")" /> 
+  <key nr="23" text="v" caps="V" num="[" /> 
+  <key nr="24" text="b" caps="B" num="]" /> 
+  <key nr="25" text="n" caps="N" num="{" /> 
+  <key nr="26" text="m" caps="M" num="}" /> 
+
+  <key nr="27" text="-" caps="-" num="_" />
+  <key nr="28" text="=" caps="=" num="+" />
+  <key nr="29" text="\" caps="\" num="|" />
+  <key nr="30" text=";" caps=";" num=":" />
+  <key nr="31" text="&apos;" caps="&apos;" num="&quot;" />
+  <key nr="32" text="," caps="," num="&lt;" />
+  <key nr="33" text="." caps="." num="&gt;" />
+  <key nr="34" text="/" caps="/" num="?" />
+  <key nr="35" text="." caps="." num="." />
+  <key nr="36" text="close" caps="close" num="close" />
+
+
+  <key nr="50" text="UP"/> 
+  <key nr="51" text="LEFT"/> 
+  <key nr="52" text="RIGHT"/> 
+  <key nr="53" text="DOWN"/> 
+  <key nr="54" text="Back" /> 
+  <key nr="55" text="ENTER"/> 
+  <key nr="56" text="CAPS"/> 
+  <key nr="57" text="NUM"/> 
+  <key nr="58" text=""/>
+ 
+  <key nr="80" text="test"/> 
+</keyboard>
